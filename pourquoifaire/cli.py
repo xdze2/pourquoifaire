@@ -123,14 +123,19 @@ def show(node_id):
 
     console = Console()
     card = Table.grid(padding=(0, 1))
-    card.add_column(style="bold cyan", width=12)
     card.add_column(style="white")
 
-    card.add_row("ID", str(node.id))
-    card.add_row("Description", node.description or "-")
-    card.add_row("Context", node.context or "-")
-    card.add_row("Status", node.status or "-")
-    card.add_row("Type", node.type or "-")
+    # Description as title style
+    title_text = f"[bold magenta]{node.description or '-'}[/]"
+    card.add_row(title_text)
+
+    # Metadata row
+    meta = f"[yellow]status[/]: {node.status or '-'}    [blue]type[/]: {node.type or '-'}  [cyan]ID[/]: {node.id}"
+    card.add_row(meta)
+
+    # Context paragraph
+    context_text = node.context or "-"
+    card.add_row(f"[green]Context[/]:\n {context_text}")
 
     # Add links section in show panel
     relations = api.get_links(node_id)
@@ -153,7 +158,7 @@ def show(node_id):
                     "in", link_type, str(src_node.id), src_node.description
                 )
 
-        card.add_row("Links", links_table)
+        card.add_row("Links:\n", links_table)
 
     panel = Panel(
         card,
