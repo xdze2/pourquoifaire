@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "how_and_why"
+version = "0.1.0"
+description = "A Python package for how and why"
+authors = [
+    {name = "Etienne"},
+]
+dependencies = [
+    "rich",
+    "click",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "black",
+    "flake8",
+]
