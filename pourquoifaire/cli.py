@@ -1,7 +1,8 @@
 import click
-from rich.console import Console
+from rich.console import Console, Group
 from rich.table import Table
 from rich.panel import Panel
+from rich.text import Text
 from rich import box
 from .database import create_db
 from . import api
@@ -111,6 +112,26 @@ def search(prompt, k, status, node_type, max_distance):
     console.print(table)
 
 
+def _link_type_border_style(link_type: str) -> str:
+    lt = (link_type or "").lower()
+    if lt == "why":
+        return "cyan"
+    if lt == "how":
+        return "magenta"
+    if lt == "but":
+        return "yellow"
+    return "bright_black"
+
+
+def _truncate_description(text: str, max_len: int = 72) -> str:
+    if not text:
+        return "—"
+    text = text.strip()
+    if len(text) <= max_len:
+        return text
+    return text[: max_len - 1] + "…"
+
+
 @cli.command(name="show")
 @click.argument("node_id", type=int)
 @handle_db_errors
@@ -122,54 +143,73 @@ def show(node_id):
         return
 
     console = Console()
-    card = Table.grid(padding=(0, 1))
-    card.add_column(style="white")
 
-    # Description as title style
-    title_text = f"[bold magenta]{node.description or '-'}[/]"
-    card.add_row(title_text)
+    main_body = Group(
+        Text(node.description or "—", style="bold magenta"),
+        Text(""),
+        Text.from_markup(
+            f"[yellow]status[/] {node.status or '—'}   "
+            f"[blue]type[/] {node.type or '—'}   "
+            f"[cyan]id[/] {node.id}"
+        ),
+        Text(""),
+        Text("Context", style="bold green"),
+        Text(node.context if node.context else "—", style="white"),
+    )
 
-    # Metadata row
-    meta = f"[yellow]status[/]: {node.status or '-'}    [blue]type[/]: {node.type or '-'}  [cyan]ID[/]: {node.id}"
-    card.add_row(meta)
-
-    # Context paragraph
-    context_text = node.context or "-"
-    card.add_row(f"[green]Context[/]:\n {context_text}")
-
-    # Add links section in show panel
-    relations = api.get_links(node_id)
-    if relations:
-        links_table = Table(
-            show_header=True, header_style="bold magenta", box=box.MINIMAL
-        )
-        links_table.add_column("Role", style="cyan", width=8)
-        links_table.add_column("Type", style="green", width=6)
-        links_table.add_column("Other ID", style="yellow", width=6)
-        links_table.add_column("Other Description", style="white")
-
-        for link_type, src_node, tgt_node in relations:
-            if src_node.id == node.id:
-                links_table.add_row(
-                    "out", link_type, str(tgt_node.id), tgt_node.description
-                )
-            else:
-                links_table.add_row(
-                    "in", link_type, str(src_node.id), src_node.description
-                )
-
-        card.add_row("Links:\n", links_table)
-
-    panel = Panel(
-        card,
-        title=f"Node {node.id}",
+    main_card = Panel(
+        main_body,
+        title=f"[bold white]●[/] [bold]Node {node.id}[/]",
         title_align="left",
         border_style="magenta",
         box=box.ROUNDED,
-        padding=(1, 1),
+        padding=(1, 2),
+        expand=True,
     )
 
-    console.print(panel)
+    relations = api.get_links(node_id)
+    link_panels: list[Panel] = []
+    for link_type, src_node, tgt_node in relations:
+        is_out = src_node.id == node.id
+        other = tgt_node if is_out else src_node
+        role = "out" if is_out else "in"
+        bstyle = _link_type_border_style(link_type)
+        title = f"[dim]{role}[/] [dim]·[/] [bold {bstyle}]{link_type}[/]"
+        mini = Group(
+            Text(_truncate_description(other.description), style="white"),
+            Text(
+                f"id {other.id} · {other.status or '—'} · {other.type or '—'}",
+                style="dim",
+            ),
+        )
+        link_panels.append(
+            Panel(
+                mini,
+                title=title,
+                title_align="left",
+                border_style=bstyle,
+                box=box.ROUNDED,
+                padding=(0, 1),
+            )
+        )
+
+    if link_panels:
+        related_body = Group(*link_panels)
+    else:
+        related_body = Group(Text("No linked nodes.", style="dim italic"))
+
+    related_column = Group(
+        Text(" Related", style="bold"),
+        Text(""),
+        related_body,
+    )
+
+    layout = Table.grid(expand=True, padding=0)
+    layout.add_column(ratio=3, min_width=28)
+    layout.add_column(ratio=2, min_width=24)
+    layout.add_row(main_card, related_column)
+
+    console.print(layout)
 
 
 @cli.command(name="link")
