@@ -2,6 +2,7 @@ import click
 from sqlmodel import Session, select
 from .database import engine, create_db
 from .models import Node
+from .export import export_nodes, import_nodes
 
 # Create the database tables
 create_db()
@@ -68,3 +69,27 @@ def modify(id, description, context, status, type):
             node.type = type
         session.commit()
         click.echo(f"Modified node {id}")
+
+
+@cli.command()
+@click.option(
+    "--output",
+    prompt="Output filename",
+    default="nodes.json",
+    help="JSON file to export to",
+)
+def export(output):
+    """Export all nodes to a JSON file."""
+    count = export_nodes(output)
+    click.echo(f"Exported {count} nodes to {output}")
+
+
+@cli.command("import")
+@click.option(
+    "--input", "input_file", prompt="Input filename", help="JSON file to import from"
+)
+@click.option("--clear", is_flag=True, help="Clear existing nodes before importing")
+def import_db(input_file, clear):
+    """Import nodes from a JSON file."""
+    count = import_nodes(input_file, clear=clear)
+    click.echo(f"Imported {count} nodes from {input_file}")
