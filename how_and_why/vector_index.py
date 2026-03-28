@@ -10,8 +10,29 @@ from sqlite_vec import serialize_float32
 from .database import engine
 
 
-def get_embedding(prompt_text: str, model: str = "mxbai-embed-large") -> List[float]:
-    """Get embedding for text using Ollama API."""
+def prepare_embedding_text(
+    description: str, context: str = "", type: str = "task"
+) -> str:
+    """Prepare text for embedding by combining description, context, and type."""
+    parts = [description]
+    if context:
+        parts.append(f"Context: {context}")
+    parts.append(f"Type: {type}")
+    return " ".join(parts)
+
+
+def get_embedding(
+    description: str,
+    context: str = "",
+    type: str = "task",
+    model: str = "nomic-embed-text",
+) -> List[float]:
+    """Get embedding for node using Ollama API.
+
+    Uses nomic-embed-text (384 dimensions) which is optimized for shorter texts.
+    Combines description, context, and type for richer embeddings.
+    """
+    prompt_text = prepare_embedding_text(description, context, type)
     response = ollama.embeddings(model=model, prompt=prompt_text)
     return response["embedding"]
 

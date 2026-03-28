@@ -26,7 +26,7 @@ TeleoGraph is designed to be **local-first** and **minimalist**:
 | **Source of Truth** | [SQLModel](https://sqlmodel.tiangolo.com/) (SQLite) | Managing the graph structure & metadata |
 | **Brain** | [Ollama](https://ollama.com/) | Natural language processing & reasoning |
 | **Logic Engine** | Python (ReAct Pattern) | Orchestrating the agent's actions |
-| **Vector Search** | [sqlite-vec](https://github.com/asg017/sqlite-vec) + Ollama Embeddings | Semantic/Fuzzy search via Vector Embeddings |
+| **Vector Search** | [sqlite-vec](https://github.com/asg017/sqlite-vec) + Ollama `nomic-embed-text` | Semantic/Fuzzy search via 768-dim embeddings |
 | **Interface** | Terminal / CLI | Fast, "loose-typing" interaction |
 
 
@@ -45,7 +45,8 @@ A **Node** consists of:
 ### ✅ Currently Implemented (MVP)
 * **Basic Task Management:** Add, modify, and search nodes via CLI
 * **Data Portability:** JSON import/export for backup and migration
-* **Vector Embeddings:** Automatic 1024-dimensional embeddings using `mxbai-embed-large` model
+* **Smart Vector Embeddings:** 768-dimensional embeddings using `nomic-embed-text`, combining description + context + type
+* **Semantic Search:** Fuzzy similarity search using sqlite-vec for intelligent task discovery
 
 ### 🚧 Planned Features
 * **Semantic Retrieval:** Search for "the music thing" and find the "Hi-Fi Audio" project automatically using Vector Embeddings.
@@ -63,8 +64,8 @@ A **Node** consists of:
 # Download and install Ollama
 curl -fsSL https://ollama.ai/install.sh | sh
 
-# Pull the embedding model
-ollama pull mxbai-embed-large
+# Pull the embedding model (optimized for short texts, 768-dim)
+ollama pull nomic-embed-text
 
 # (Optional) Pull a reasoning model for future features
 ollama pull qwen3:14b
@@ -73,7 +74,7 @@ ollama pull qwen3:14b
 **On Windows:**
 Download from [ollama.ai](https://ollama.ai) and run the installer, then:
 ```bash
-ollama pull mxbai-embed-large
+ollama pull nomic-embed-text
 ```
 
 ### 2. Install Python Dependencies
@@ -98,8 +99,8 @@ how_and_why --help
 
 - ✅ **Basic CRUD Operations:** Add, modify, search nodes via CLI
 - ✅ **JSON Import/Export:** Backup and restore your data
-- ✅ **Vector Embeddings:** Automatic 1024-dimensional embeddings using `mxbai-embed-large`
-- ✅ **Vector Search:** Fuzzy search using sqlite-vec for semantic similarity
+- ✅ **Smart Vector Embeddings:** 768-dim using description + context + type for rich semantic understanding
+- ✅ **Semantic Search:** Fuzzy search via `find` command for intelligent discovery
 - 🚧 **Graph Reasoning:** LLM-powered analysis and suggestions (planned)
 
 ---

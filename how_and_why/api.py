@@ -17,8 +17,8 @@ def add_node(
         session.add(node)
         session.commit()
 
-        # Compute and store embedding for the description
-        embedding = get_embedding(description)
+        # Compute and store embedding using description, context, and type
+        embedding = get_embedding(description, context, type)
         store_embedding(node.id, embedding)
 
         return node.id
@@ -53,17 +53,23 @@ def modify_node(
         if not node:
             return False
 
+        embedding_changed = False
         if description is not None:
             node.description = description
-            # Recompute embedding when description changes
-            embedding = get_embedding(description)
-            store_embedding(node.id, embedding)
+            embedding_changed = True
         if context is not None:
             node.context = context
+            embedding_changed = True
         if status is not None:
             node.status = status
         if type is not None:
             node.type = type
+            embedding_changed = True
+
+        # Recompute embedding if any of the embedding-relevant fields changed
+        if embedding_changed:
+            embedding = get_embedding(node.description, node.context, node.type)
+            store_embedding(node.id, embedding)
 
         session.commit()
         return True
