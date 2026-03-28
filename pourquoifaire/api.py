@@ -40,20 +40,42 @@ def get_node(node_id: int) -> Node | None:
         return Node.model_validate(node.model_dump()) if node else None
 
 
-def add_link(src_id: int, tgt_id: int, link_type: str = "why") -> int:
-    """Create a directional link between nodes."""
+def _link_storage_form(
+    src_id: int, tgt_id: int, link_type: str
+) -> tuple[int, int, str]:
+    """Map user-facing link type to persisted row. `how` is stored as inverse `why`."""
+    kind = link_type.lower()
+    if kind == "why":
+        return src_id, tgt_id, "why"
+    if kind == "how":
+        return tgt_id, src_id, "why"
+    if kind == "but":
+        return src_id, tgt_id, "but"
+    raise ValueError(
+        f"Invalid link type {link_type!r}. Expected 'why', 'how', or 'but'."
+    )
+
+
+def add_link(src_id: int, tgt_id: int, link_type: str = "why") -> tuple[int, int, int, str]:
+    """Create a directional link between nodes.
+
+    ``how`` edges are persisted as ``why`` in the reverse direction (how and why are dual).
+    Returns ``(link_id, stored_src, stored_tgt, stored_type)``.
+    """
     # Validate source/target exist
     if not get_node(src_id) or not get_node(tgt_id):
         raise ValueError("Source or target node not found")
 
+    store_src, store_tgt, store_type = _link_storage_form(src_id, tgt_id, link_type)
+
     from .models import Link
 
-    link = Link(src=src_id, tgt=tgt_id, link_type=link_type)
+    link = Link(src=store_src, tgt=store_tgt, link_type=store_type)
     with Session(engine) as session:
         session.add(link)
         session.commit()
         session.refresh(link)
-        return link.id
+        return link.id, store_src, store_tgt, store_type
 
 
 def get_links(node_id: int) -> list[tuple[str, Node, Node]]:

@@ -175,13 +175,18 @@ def show(node_id):
 @cli.command(name="link")
 @click.argument("src", type=int)
 @click.argument("tgt", type=int)
-@click.option("--type", "link_type", default="why", help="Link type: why, how, but")
+@click.option(
+    "--type",
+    "link_type",
+    default="why",
+    help="Relation: why, how (stored as inverse why), or but",
+)
 @handle_db_errors
 def link(src, tgt, link_type):
-    """Link two nodes (src -> tgt) with a relation type."""
+    """Link two nodes (src -> tgt). ``how`` is stored as a ``why`` edge in the reverse direction."""
     try:
-        link_id = api.add_link(src, tgt, link_type)
-        click.echo(f"Link created {link_id}: {src} -[{link_type}]-> {tgt}")
+        link_id, s, t, stored = api.add_link(src, tgt, link_type)
+        click.echo(f"Link created {link_id}: {s} -[{stored}]-> {t}")
     except ValueError as e:
         click.echo(f"Error: {e}")
 
