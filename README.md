@@ -1,4 +1,4 @@
-# How and Why 
+# PourquoiFaire 
 
 - "Yet another todo list app"
 - a **Reasoning Engine** for complex projects.
@@ -84,17 +84,17 @@ pip install -e .
 
 ### 3. Run the CLI
 ```bash
-how_and_why --help
+pqf --help
 ```
 
 **Available Commands:**
-- `how_and_why add` - Add a new task
-- `how_and_why search --query "text"` - Search by exact text match
-- `how_and_why find --query "semantic search"` - Semantic vector search
+- `pqf add` - Add a new task
+- `pqf search --query "text"` - Search by exact text match
+- `pqf find --query "semantic search"` - Semantic vector search
   - optional `--status`, `--type`, `--max-distance` filters
-- `how_and_why modify --id <id>` - Modify an existing task
-- `how_and_why export --output nodes.json` - Export all tasks to JSON
-- `how_and_why import --input nodes.json` - Import tasks from JSON
+- `pqf modify --id <id>` - Modify an existing task
+- `pqf export --output nodes.json` - Export all tasks to JSON
+- `pqf import --input nodes.json` - Import tasks from JSON
 
 ## 📊 Current Implementation Status
 
@@ -110,7 +110,7 @@ how_and_why --help
 
 > **User:** "I'm stuck on the radio retrofit. The mechanical buttons are too expensive."
 >
-> **TeleoGraph:** "I've marked `mechanical-buttons` as **STUCK** (Reason: Budget). Your current 'Why' is `Industrial Haptics`. Should we explore **Alternative Hows**, such as 3D printing custom knobs or refurbishing vintage parts from a different model?"
+> **PourquoiFaire:** "I've marked `mechanical-buttons` as **STUCK** (Reason: Budget). Your current 'Why' is `Industrial Haptics`. Should we explore **Alternative Hows**, such as 3D printing custom knobs or refurbishing vintage parts from a different model?"
 
 ---
 

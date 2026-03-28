@@ -3,9 +3,9 @@ requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "how_and_why"
+name = "pourquoifaire"
 version = "0.1.0"
-description = "A Python package for how and why"
+description = "A Python package pourquoifaire"
 authors = [
     {name = "Etienne"},
 ]
@@ -21,7 +21,8 @@ dependencies = [
 exclude = ["data*"]
 
 [project.scripts]
-how_and_why = "how_and_why.cli:cli"
+pqf = "pourquoifaire.cli:cli"
+pourquoifaire = "pourquoifaire.cli:cli"
 
 [project.optional-dependencies]
 dev = [
