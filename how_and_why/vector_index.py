@@ -84,7 +84,12 @@ def get_embedding_for_node(node_id: int) -> List[float] | None:
         return None
 
 
-def fuzzy_search(query_vector: List[float], k: int = 3) -> List[tuple[int, float]]:
+def fuzzy_search(
+    query_vector: List[float],
+    k: int = 3,
+    max_distance: float | None = None,
+    exclude_ids: list[int] | None = None,
+) -> List[tuple[int, float]]:
     """Find k nearest neighbors using sqlite-vec."""
     with engine.connect() as conn:
         # Load extension for this connection
@@ -92,8 +97,6 @@ def fuzzy_search(query_vector: List[float], k: int = 3) -> List[tuple[int, float
         raw_con.enable_load_extension(True)
 
         sqlite_vec.load(raw_con)
-
-        # KNN Search: Find the closest Node IDs
 
         results = conn.execute(
             text(
@@ -104,7 +107,19 @@ def fuzzy_search(query_vector: List[float], k: int = 3) -> List[tuple[int, float
             ORDER BY distance
         """
             ),
-            {"query_vec": serialize_float32(query_vector), "k": k},
+            {"query_vec": serialize_float32(query_vector), "k": max(k * 5, 10)},
         ).fetchall()
 
-        return [(int(row[0]), float(row[1])) for row in results]
+        processed = []
+        for row in results:
+            node_id = int(row[0])
+            distance = float(row[1])
+            if exclude_ids and node_id in exclude_ids:
+                continue
+            if max_distance is not None and distance > max_distance:
+                continue
+            processed.append((node_id, distance))
+            if len(processed) >= k:
+                break
+
+        return processed

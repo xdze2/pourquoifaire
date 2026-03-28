@@ -91,6 +91,7 @@ how_and_why --help
 - `how_and_why add` - Add a new task
 - `how_and_why search --query "text"` - Search by exact text match
 - `how_and_why find --query "semantic search"` - Semantic vector search
+  - optional `--status`, `--type`, `--max-distance` filters
 - `how_and_why modify --id <id>` - Modify an existing task
 - `how_and_why export --output nodes.json` - Export all tasks to JSON
 - `how_and_why import --input nodes.json` - Import tasks from JSON

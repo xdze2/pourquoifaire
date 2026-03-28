@@ -48,23 +48,35 @@ def search(query, k):
     "--query", prompt="Vector search query", help="Semantic search using embeddings"
 )
 @click.option("--k", default=3, help="Number of results to return")
+@click.option(
+    "--status",
+    default=None,
+    help="Optional status filter (pending, in_progress, stuck, done)",
+)
+@click.option(
+    "--type", "node_type", default=None, help="Optional type filter (task, project)"
+)
+@click.option(
+    "--max-distance", default=None, type=float, help="Optional max distance threshold"
+)
 @handle_db_errors
-def find(query, k):
+def find(query, k, status, node_type, max_distance):
     """Find tasks using semantic vector search."""
-    from . import vector_index
-
-    query_embedding = vector_index.get_embedding(query)
-    results = vector_index.fuzzy_search(query_embedding, k=k)
+    results = api.vector_search(
+        query=query,
+        k=k,
+        status=status,
+        type=node_type,
+        max_distance=max_distance,
+    )
 
     if not results:
         click.echo("No similar nodes found.")
     else:
-        for node_id, distance in results:
-            node = api.get_node(node_id)
-            if node:
-                click.echo(
-                    f"ID: {node.id}, Distance: {distance:.3f}, Description: {node.description}"
-                )
+        for node, distance in results:
+            click.echo(
+                f"ID: {node.id}, Distance: {distance:.3f}, Description: {node.description}, Status: {node.status}, Type: {node.type}"
+            )
 
 
 @cli.command()

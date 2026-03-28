@@ -40,6 +40,42 @@ def get_node(node_id: int) -> Node | None:
         return Node.model_validate(node.model_dump()) if node else None
 
 
+def vector_search(
+    query: str,
+    k: int = 3,
+    status: str | None = None,
+    type: str | None = None,
+    max_distance: float | None = None,
+    exclude_ids: list[int] | None = None,
+) -> list[tuple[Node, float]]:
+    """Perform vector search with optional status/type filtering and max distance."""
+    query_embedding = get_embedding(query)
+    from .vector_index import fuzzy_search
+
+    candidates = fuzzy_search(
+        query_embedding,
+        k=100,
+        max_distance=max_distance,
+        exclude_ids=exclude_ids,
+    )
+
+    results = []
+    with Session(engine) as session:
+        for node_id, distance in candidates:
+            node = session.get(Node, node_id)
+            if not node:
+                continue
+            if status is not None and node.status != status:
+                continue
+            if type is not None and node.type != type:
+                continue
+            results.append((Node.model_validate(node.model_dump()), distance))
+            if len(results) >= k:
+                break
+
+    return results
+
+
 def modify_node(
     node_id: int,
     description: str | None = None,
