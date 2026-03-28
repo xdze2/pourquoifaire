@@ -88,9 +88,9 @@ pqf --help
 ```
 
 **Available Commands:**
-- `pqf add` - Add a new task
-- `pqf search --query "text"` - Search by exact text match
-- `pqf find --query "semantic search"` - Semantic vector search
+- `pqf add "description"` - Add a new task (positional description)
+- `pqf search "text"` - Search by exact text match (case-insensitive)
+- `pqf find --query "semantic search"` or `pqf semantic --query "semantic search"` - Semantic vector search
   - optional `--status`, `--type`, `--max-distance` filters
 - `pqf modify --id <id>` - Modify an existing task
 - `pqf export --output nodes.json` - Export all tasks to JSON

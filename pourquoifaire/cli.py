@@ -27,13 +27,13 @@ def add(description, context, status, type):
     click.echo(f"Added node {node_id}")
 
 
-@cli.command()
-@click.argument("query")
+@cli.command(name="query")
+@click.argument("keywords")
 @click.option("--k", default=3, help="Number of results to return")
 @handle_db_errors
-def search(query, k):
-    """Search tasks by description."""
-    nodes = api.search_nodes(query)
+def query(keywords, k):
+    """Query tasks by description (case-insensitive)."""
+    nodes = api.search_nodes(keywords)
     if not nodes:
         click.echo("No nodes found.")
     else:
@@ -43,10 +43,8 @@ def search(query, k):
             )
 
 
-@cli.command()
-@click.option(
-    "--query", prompt="Vector search query", help="Semantic search using embeddings"
-)
+@cli.command(name="search")
+@click.argument("prompt")
 @click.option("--k", default=3, help="Number of results to return")
 @click.option(
     "--status",
@@ -60,10 +58,10 @@ def search(query, k):
     "--max-distance", default=None, type=float, help="Optional max distance threshold"
 )
 @handle_db_errors
-def find(query, k, status, node_type, max_distance):
-    """Find tasks using semantic vector search."""
+def search(prompt, k, status, node_type, max_distance):
+    """Search tasks using semantic vector search (embedding-based)."""
     results = api.vector_search(
-        query=query,
+        query=prompt,
         k=k,
         status=status,
         type=node_type,
