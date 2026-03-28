@@ -26,7 +26,7 @@ TeleoGraph is designed to be **local-first** and **minimalist**:
 | **Source of Truth** | [SQLModel](https://sqlmodel.tiangolo.com/) (SQLite) | Managing the graph structure & metadata |
 | **Brain** | [Ollama](https://ollama.com/) | Natural language processing & reasoning |
 | **Logic Engine** | Python (ReAct Pattern) | Orchestrating the agent's actions |
-| **Search Engine** | [ChromaDB](https://www.trychroma.com/) | Semantic/Fuzzy search via Vector Embeddings |
+| **Vector Search** | Ollama Embeddings (`mxbai-embed-large`) | Semantic/Fuzzy search via Vector Embeddings |
 | **Interface** | Terminal / CLI | Fast, "loose-typing" interaction |
 
 
@@ -40,30 +40,59 @@ A **Node** consists of:
 * **Status:** `Active`, `Stuck`, `Done`, or `Archived` (for rejected alternatives).
 
 
-## 🤖 Features (MVP)
+## 🤖 Features
 
+### ✅ Currently Implemented (MVP)
+* **Basic Task Management:** Add, modify, and search nodes via CLI
+* **Data Portability:** JSON import/export for backup and migration
+* **Vector Embeddings:** Automatic 1024-dimensional embeddings using `mxbai-embed-large` model
+
+### 🚧 Planned Features
 * **Semantic Retrieval:** Search for "the music thing" and find the "Hi-Fi Audio" project automatically using Vector Embeddings.
 * **The "Stuck" Diagnostic:** Ask the LLM why a project isn't moving. It analyzes the graph to find missing "How" steps or contradictory "Why" goals.
 * **Decision History:** When you choose one **Alternative** over another, TeleoGraph records the reasoning. If you get stuck later, the LLM can suggest revisiting the "Archived" paths.
 * **Proactive Decomposition:** Add a high-level goal, and the LLM suggests three different ways ("How" branches) to achieve it.
 
 
-## 🛠️ Quick Start (Planned)
+## 🛠️ Quick Start
 
-1. **Install Dependencies:**
-   ```bash
-   pip install -e .
-   + install ollama...
-   ```
-2. **Launch Ollama:**
-   ```bash
-   ollama pull qwen3:14b
-   ollama pull mxbai-embed-large
-   ```
-3. **Run the Architect:**
-   ```bash
-   python main.py
-   ```
+### 1. Install Ollama
+
+**On Linux/macOS:**
+```bash
+# Download and install Ollama
+curl -fsSL https://ollama.ai/install.sh | sh
+
+# Pull the embedding model
+ollama pull mxbai-embed-large
+
+# (Optional) Pull a reasoning model for future features
+ollama pull qwen3:14b
+```
+
+**On Windows:**
+Download from [ollama.ai](https://ollama.ai) and run the installer, then:
+```bash
+ollama pull mxbai-embed-large
+```
+
+### 2. Install Python Dependencies
+```bash
+pip install -e .
+```
+
+### 3. Run the CLI
+```bash
+how_and_why --help
+```
+
+## 📊 Current Implementation Status
+
+- ✅ **Basic CRUD Operations:** Add, modify, search nodes via CLI
+- ✅ **JSON Import/Export:** Backup and restore your data
+- ✅ **Vector Embeddings:** Automatic embedding generation for semantic search (mock storage)
+- 🚧 **Vector Search:** Semantic search functionality (in development)
+- 🚧 **Graph Reasoning:** LLM-powered analysis and suggestions (planned)
 
 ---
 
@@ -72,3 +101,16 @@ A **Node** consists of:
 > **User:** "I'm stuck on the radio retrofit. The mechanical buttons are too expensive."
 >
 > **TeleoGraph:** "I've marked `mechanical-buttons` as **STUCK** (Reason: Budget). Your current 'Why' is `Industrial Haptics`. Should we explore **Alternative Hows**, such as 3D printing custom knobs or refurbishing vintage parts from a different model?"
+
+---
+
+## 🤖 Development
+
+This project is being developed with the assistance of **GitHub Copilot**, an AI-powered coding assistant that helps with:
+- Code generation and completion
+- Architecture design and refactoring
+- Documentation writing
+- Debugging and testing
+- Package management and dependency resolution
+
+GitHub Copilot accelerates development while maintaining code quality and following best practices.
