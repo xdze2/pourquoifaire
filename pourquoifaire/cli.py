@@ -132,6 +132,29 @@ def show(node_id):
     card.add_row("Status", node.status or "-")
     card.add_row("Type", node.type or "-")
 
+    # Add links section in show panel
+    relations = api.get_links(node_id)
+    if relations:
+        links_table = Table(
+            show_header=True, header_style="bold magenta", box=box.MINIMAL
+        )
+        links_table.add_column("Role", style="cyan", width=8)
+        links_table.add_column("Type", style="green", width=6)
+        links_table.add_column("Other ID", style="yellow", width=6)
+        links_table.add_column("Other Description", style="white")
+
+        for link_type, src_node, tgt_node in relations:
+            if src_node.id == node.id:
+                links_table.add_row(
+                    "out", link_type, str(tgt_node.id), tgt_node.description
+                )
+            else:
+                links_table.add_row(
+                    "in", link_type, str(src_node.id), src_node.description
+                )
+
+        card.add_row("Links", links_table)
+
     panel = Panel(
         card,
         title=f"Node {node.id}",
@@ -142,6 +165,50 @@ def show(node_id):
     )
 
     console.print(panel)
+
+
+@cli.command(name="link")
+@click.argument("src", type=int)
+@click.argument("tgt", type=int)
+@click.option("--type", "link_type", default="why", help="Link type: why, how, but")
+@handle_db_errors
+def link(src, tgt, link_type):
+    """Link two nodes (src -> tgt) with a relation type."""
+    try:
+        link_id = api.add_link(src, tgt, link_type)
+        click.echo(f"Link created {link_id}: {src} -[{link_type}]-> {tgt}")
+    except ValueError as e:
+        click.echo(f"Error: {e}")
+
+
+@cli.command(name="links")
+@click.argument("node_id", type=int)
+@handle_db_errors
+def links(node_id):
+    """Show links for a node."""
+    relations = api.get_links(node_id)
+    if not relations:
+        click.echo("No links for this node.")
+        return
+
+    console = Console()
+    table = Table(show_header=True, header_style="bold magenta", box=box.MINIMAL)
+    table.add_column("Type", style="cyan", width=8)
+    table.add_column("Src", style="green", width=5)
+    table.add_column("Src Desc", style="white")
+    table.add_column("Tgt", style="yellow", width=5)
+    table.add_column("Tgt Desc", style="white")
+
+    for link_type, src_node, tgt_node in relations:
+        table.add_row(
+            link_type,
+            str(src_node.id),
+            src_node.description,
+            str(tgt_node.id),
+            tgt_node.description,
+        )
+
+    console.print(table)
 
 
 @cli.command()

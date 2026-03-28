@@ -40,6 +40,40 @@ def get_node(node_id: int) -> Node | None:
         return Node.model_validate(node.model_dump()) if node else None
 
 
+def add_link(src_id: int, tgt_id: int, link_type: str = "why") -> int:
+    """Create a directional link between nodes."""
+    # Validate source/target exist
+    if not get_node(src_id) or not get_node(tgt_id):
+        raise ValueError("Source or target node not found")
+
+    from .models import Link
+
+    link = Link(src=src_id, tgt=tgt_id, link_type=link_type)
+    with Session(engine) as session:
+        session.add(link)
+        session.commit()
+        session.refresh(link)
+        return link.id
+
+
+def get_links(node_id: int) -> list[tuple[str, Node, Node]]:
+    """Get all links where node is source or target."""
+    from .models import Link
+
+    with Session(engine) as session:
+        statement = select(Link).where((Link.src == node_id) | (Link.tgt == node_id))
+        links = session.exec(statement).all()
+
+        results = []
+        for link in links:
+            src_node = session.get(Node, link.src)
+            tgt_node = session.get(Node, link.tgt)
+            if src_node and tgt_node:
+                results.append((link.link_type, src_node, tgt_node))
+
+    return results
+
+
 def vector_search(
     query: str,
     k: int = 3,
