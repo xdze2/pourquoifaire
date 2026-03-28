@@ -40,6 +40,14 @@ def get_node(node_id: int) -> Node | None:
         return Node.model_validate(node.model_dump()) if node else None
 
 
+def list_nodes(limit: int = 500) -> list[Node]:
+    """Return nodes ordered by id (newest last)."""
+    with Session(engine) as session:
+        statement = select(Node).order_by(Node.id).limit(limit)
+        nodes = session.exec(statement).all()
+        return [Node.model_validate(n.model_dump()) for n in nodes]
+
+
 def _link_storage_form(
     src_id: int, tgt_id: int, link_type: str
 ) -> tuple[int, int, str]:

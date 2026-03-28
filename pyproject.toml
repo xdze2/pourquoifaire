@@ -11,6 +11,7 @@ authors = [
 ]
 dependencies = [
     "rich",
+    "textual",
     "click",
     "sqlmodel",
     "ollama",
@@ -23,6 +24,7 @@ exclude = ["data*"]
 [project.scripts]
 pqf = "pourquoifaire.cli:cli"
 pourquoifaire = "pourquoifaire.cli:cli"
+pqf-tui = "pourquoifaire.tui_app:run"
 
 [project.optional-dependencies]
 dev = [
