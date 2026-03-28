@@ -12,7 +12,11 @@ authors = [
 dependencies = [
     "rich",
     "click",
+    "sqlmodel",
 ]
+
+[project.scripts]
+how_and_why = "how_and_why.cli:cli"
 
 [project.optional-dependencies]
 dev = [
