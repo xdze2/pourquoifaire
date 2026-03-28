@@ -1,6 +1,7 @@
 import click
 from rich.console import Console
 from rich.table import Table
+from rich.panel import Panel
 from rich import box
 from .database import create_db
 from . import api
@@ -108,6 +109,39 @@ def search(prompt, k, status, node_type, max_distance):
         )
 
     console.print(table)
+
+
+@cli.command(name="show")
+@click.argument("node_id", type=int)
+@handle_db_errors
+def show(node_id):
+    """Show full information for a node by ID."""
+    node = api.get_node(node_id)
+    if not node:
+        click.echo(f"Node with ID {node_id} not found.")
+        return
+
+    console = Console()
+    card = Table.grid(padding=(0, 1))
+    card.add_column(style="bold cyan", width=12)
+    card.add_column(style="white")
+
+    card.add_row("ID", str(node.id))
+    card.add_row("Description", node.description or "-")
+    card.add_row("Context", node.context or "-")
+    card.add_row("Status", node.status or "-")
+    card.add_row("Type", node.type or "-")
+
+    panel = Panel(
+        card,
+        title=f"Node {node.id}",
+        title_align="left",
+        border_style="magenta",
+        box=box.ROUNDED,
+        padding=(1, 1),
+    )
+
+    console.print(panel)
 
 
 @cli.command()
