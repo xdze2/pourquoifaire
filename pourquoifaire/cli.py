@@ -9,12 +9,12 @@ create_db()
 
 @click.group()
 def cli():
-    """A terminal-based todo list app using SQLModel."""
+    """PourquoiFaire - a terminal-based ToDo list app."""
     pass
 
 
 @cli.command()
-@click.option("--description", prompt="Description", help="Task description")
+@click.argument("description")
 @click.option("--context", default="", help="Task context")
 @click.option("--status", default="pending", help="Task status")
 @click.option("--type", default="task", help="Task type")
@@ -28,7 +28,7 @@ def add(description, context, status, type):
 
 
 @cli.command()
-@click.option("--query", prompt="Search query", help="Semantic search query")
+@click.argument("query")
 @click.option("--k", default=3, help="Number of results to return")
 @handle_db_errors
 def search(query, k):
@@ -37,7 +37,7 @@ def search(query, k):
     if not nodes:
         click.echo("No nodes found.")
     else:
-        for node in nodes:
+        for node in nodes[:k]:
             click.echo(
                 f"ID: {node.id}, Description: {node.description}, Context: {node.context}, Status: {node.status}, Type: {node.type}"
             )
