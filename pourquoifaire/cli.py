@@ -1,4 +1,7 @@
 import click
+from rich.console import Console
+from rich.table import Table
+from rich import box
 from .database import create_db
 from . import api
 from .errors import handle_db_errors
@@ -36,11 +39,26 @@ def query(keywords, k):
     nodes = api.search_nodes(keywords)
     if not nodes:
         click.echo("No nodes found.")
-    else:
-        for node in nodes[:k]:
-            click.echo(
-                f"ID: {node.id}, Description: {node.description}, Context: {node.context}, Status: {node.status}, Type: {node.type}"
-            )
+        return
+
+    console = Console()
+    table = Table(show_header=True, header_style="bold magenta", box=box.MINIMAL)
+    table.add_column("ID", style="cyan", width=4)
+    table.add_column("Description", style="white")
+    table.add_column("Context", style="green")
+    table.add_column("Status", style="yellow", width=12)
+    table.add_column("Type", style="bright_blue", width=10)
+
+    for node in nodes[:k]:
+        table.add_row(
+            str(node.id),
+            node.description,
+            node.context or "-",
+            node.status,
+            node.type,
+        )
+
+    console.print(table)
 
 
 @cli.command(name="search")
@@ -70,11 +88,26 @@ def search(prompt, k, status, node_type, max_distance):
 
     if not results:
         click.echo("No similar nodes found.")
-    else:
-        for node, distance in results:
-            click.echo(
-                f"ID: {node.id}, Distance: {distance:.3f}, Description: {node.description}, Status: {node.status}, Type: {node.type}"
-            )
+        return
+
+    console = Console()
+    table = Table(show_header=True, header_style="bold magenta", box=box.MINIMAL)
+    table.add_column("ID", style="cyan", width=4)
+    table.add_column("Distance", style="bright_magenta", width=8)
+    table.add_column("Description", style="white")
+    table.add_column("Status", style="yellow", width=12)
+    table.add_column("Type", style="bright_blue", width=10)
+
+    for node, distance in results:
+        table.add_row(
+            str(node.id),
+            f"{distance:.3f}",
+            node.description,
+            node.status,
+            node.type,
+        )
+
+    console.print(table)
 
 
 @cli.command()
