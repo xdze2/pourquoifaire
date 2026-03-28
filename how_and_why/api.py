@@ -5,6 +5,7 @@ from pathlib import Path
 from sqlmodel import Session, select
 from .database import engine
 from .models import Node
+from .vector_index import get_embedding, store_embedding
 
 
 def add_node(
@@ -15,6 +16,11 @@ def add_node(
     with Session(engine) as session:
         session.add(node)
         session.commit()
+
+        # Compute and store embedding for the description
+        embedding = get_embedding(description)
+        store_embedding(node.id, embedding)
+
         return node.id
 
 
@@ -49,6 +55,9 @@ def modify_node(
 
         if description is not None:
             node.description = description
+            # Recompute embedding when description changes
+            embedding = get_embedding(description)
+            store_embedding(node.id, embedding)
         if context is not None:
             node.context = context
         if status is not None:

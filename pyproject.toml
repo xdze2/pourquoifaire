@@ -13,7 +13,11 @@ dependencies = [
     "rich",
     "click",
     "sqlmodel",
+    "ollama",
 ]
+
+[tool.setuptools.packages.find]
+exclude = ["data*"]
 
 [project.scripts]
 how_and_why = "how_and_why.cli:cli"
