@@ -28,11 +28,10 @@ def add(description, context, status, type):
 
 
 @cli.command()
-@click.option(
-    "--query", prompt="Search query", help="Search in description (case-insensitive)"
-)
+@click.option("--query", prompt="Search query", help="Semantic search query")
+@click.option("--k", default=3, help="Number of results to return")
 @handle_db_errors
-def search(query):
+def search(query, k):
     """Search tasks by description."""
     nodes = api.search_nodes(query)
     if not nodes:
@@ -42,6 +41,30 @@ def search(query):
             click.echo(
                 f"ID: {node.id}, Description: {node.description}, Context: {node.context}, Status: {node.status}, Type: {node.type}"
             )
+
+
+@cli.command()
+@click.option(
+    "--query", prompt="Vector search query", help="Semantic search using embeddings"
+)
+@click.option("--k", default=3, help="Number of results to return")
+@handle_db_errors
+def find(query, k):
+    """Find tasks using semantic vector search."""
+    from . import vector_index
+
+    query_embedding = vector_index.get_embedding(query)
+    results = vector_index.fuzzy_search(query_embedding, k=k)
+
+    if not results:
+        click.echo("No similar nodes found.")
+    else:
+        for node_id, distance in results:
+            node = api.get_node(node_id)
+            if node:
+                click.echo(
+                    f"ID: {node.id}, Distance: {distance:.3f}, Description: {node.description}"
+                )
 
 
 @cli.command()

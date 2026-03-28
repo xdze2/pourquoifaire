@@ -26,7 +26,7 @@ TeleoGraph is designed to be **local-first** and **minimalist**:
 | **Source of Truth** | [SQLModel](https://sqlmodel.tiangolo.com/) (SQLite) | Managing the graph structure & metadata |
 | **Brain** | [Ollama](https://ollama.com/) | Natural language processing & reasoning |
 | **Logic Engine** | Python (ReAct Pattern) | Orchestrating the agent's actions |
-| **Vector Search** | Ollama Embeddings (`mxbai-embed-large`) | Semantic/Fuzzy search via Vector Embeddings |
+| **Vector Search** | [sqlite-vec](https://github.com/asg017/sqlite-vec) + Ollama Embeddings | Semantic/Fuzzy search via Vector Embeddings |
 | **Interface** | Terminal / CLI | Fast, "loose-typing" interaction |
 
 
@@ -86,12 +86,20 @@ pip install -e .
 how_and_why --help
 ```
 
+**Available Commands:**
+- `how_and_why add` - Add a new task
+- `how_and_why search --query "text"` - Search by exact text match
+- `how_and_why find --query "semantic search"` - Semantic vector search
+- `how_and_why modify --id <id>` - Modify an existing task
+- `how_and_why export --output nodes.json` - Export all tasks to JSON
+- `how_and_why import --input nodes.json` - Import tasks from JSON
+
 ## 📊 Current Implementation Status
 
 - ✅ **Basic CRUD Operations:** Add, modify, search nodes via CLI
 - ✅ **JSON Import/Export:** Backup and restore your data
-- ✅ **Vector Embeddings:** Automatic embedding generation for semantic search (mock storage)
-- 🚧 **Vector Search:** Semantic search functionality (in development)
+- ✅ **Vector Embeddings:** Automatic 1024-dimensional embeddings using `mxbai-embed-large`
+- ✅ **Vector Search:** Fuzzy search using sqlite-vec for semantic similarity
 - 🚧 **Graph Reasoning:** LLM-powered analysis and suggestions (planned)
 
 ---
